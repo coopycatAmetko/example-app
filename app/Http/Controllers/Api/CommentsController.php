@@ -8,6 +8,9 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Laravel\Facades\Image;
+use App\Jobs\ProcessUploadedImage;
+use App\Events\CommentCreated;
+use Illuminate\Support\Facades\Cache;
 
 class CommentsController extends Controller
 {
@@ -33,12 +36,29 @@ class CommentsController extends Controller
 
     public function getChildren(Post $post, Comment $comment, Request $request)
     {
+        $page = $request->get('page', 1);
+        $cache_key = 'coment_children_' . $comment->getKey() . '_page_' . $page;
+    
+        if (Cache::has($cache_key)) {
+            return Cache::get($cache_key);
+        }
+    
         $comments = $comment->children()
             ->with(['files'])
             ->withCount('children as has_children')
             ->paginate(25);
-
-        return response()->json($comments, 200,);
+    
+        Cache::forever($cache_key, $comments);
+    
+        // page list cache update
+        $pages_list_key = 'coment_children_pages_' . $comment->getKey();
+        $pages = Cache::get($pages_list_key, []);
+        if (!in_array($page, $pages)) {
+            $pages[] = $page;
+            Cache::forever($pages_list_key, $pages);
+        }
+    
+        return response()->json($comments);
     }
 
     public function store(Post $post, Request $request)
@@ -73,6 +93,7 @@ class CommentsController extends Controller
             'homepage' => $request->homepage,
             'text' => $text,
         ]);
+        event(new CommentCreated($comment));
 
         if ($request->hasFile('file')) {
             $this->processFile($request->file('file'), $comment);
@@ -114,6 +135,7 @@ class CommentsController extends Controller
             'homepage' => $request->homepage,
             'text' => $text,
         ]);
+        event(new CommentCreated($comment));
 
         $reply->appendToNode($comment)->save();
 
@@ -155,18 +177,9 @@ class CommentsController extends Controller
         $path = 'uploads/' . uniqid() . '.' . $extension;
         
         if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) {
-
             $img = Image::read($file);
-            
-            // Resize if larger than 320x240
-            if ($img->width() > 320 || $img->height() > 240) {
-                $img->resize(320, 240, function ($constraint) {
-                    $constraint->aspectRatio();
-                    $constraint->upsize();
-                });
-            }
-            
             $img->save(public_path($path));
+            ProcessUploadedImage::dispatch($path, $comment);
         } else {
             $file->move(public_path('uploads'), basename($path));
         }

@@ -9,6 +9,7 @@ class File extends Model
     // Fields that are mass assignable
     protected $fillable = [
         'path',
+        'thumb_path',
         'type'
     ];
 

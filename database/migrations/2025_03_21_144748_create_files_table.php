@@ -15,8 +15,8 @@ class CreateFilesTable extends Migration
             $table->id();
             $table->foreignId('comment_id')->constrained()->onDelete('cascade');
             $table->string('path');
-            $table->string('type');
-            $table->string('original_name')->nullable();
+            $table->string('thumb_path')->nullable();
+            $table->string('type', 64);
             $table->timestamps();
         });
     }

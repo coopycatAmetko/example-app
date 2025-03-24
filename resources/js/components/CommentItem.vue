@@ -25,7 +25,7 @@
             <div v-for="file in comment.files" :key="file.id" class="mt-2">
                 <div v-if="isImage(file.type)">
                     <a :href="`/${file.path}`" data-lightbox="comment-gallery" class="block w-auto h-auto max-w-xs">
-                        <img :src="`/${file.path}`" alt="Attached image" class="max-w-full h-auto rounded">
+                        <img :src="`/${file.thumb_path || file.path}`" alt="Attached image" class="max-w-full h-auto rounded">
                     </a>
                 </div>
                 <div v-else-if="isTextFile(file.type)">
