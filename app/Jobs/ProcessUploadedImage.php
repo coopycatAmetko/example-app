@@ -43,16 +43,22 @@ class ProcessUploadedImage implements ShouldQueue
             
             $path_info = pathinfo(public_path($this->path));
             $extension = $path_info['extension'] ?? 'jpg';
-            
+
             $original_filename = $path_info['filename'];
             $new_filename = $original_filename . '_thumb' . '.' . $extension;
             $new_path = 'uploads/' . $new_filename;
-            
+
             if ($img->width() > 320 || $img->height() > 240) {
-                $img->resize(320, 240, function ($constraint) {
-                    $constraint->aspectRatio();
-                    $constraint->upsize();
-                });
+                $original_width = $img->width();
+                $original_height = $img->height();
+                $target_width = 320;
+                $target_height = 240;
+                $scale = min($target_width / $original_width, $target_height / $original_height);
+                
+                $new_width = (int) ($original_width * $scale);
+                $new_height = (int) ($original_height * $scale);
+
+                $img->resize($new_width, $new_height);
             }
             
             $img->save(public_path($new_path));

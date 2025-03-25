@@ -1,11 +1,27 @@
 import axios from 'axios';
-import { createApp } from 'vue';
-import App from './App.vue';
-import router from './router';
-
 window.axios = axios;
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+window.axios.defaults.headers.common = {
+    'X-Requested-With': 'XMLHttpRequest',
+    'Accept': 'application/json'
+};
 
-const app = createApp(App);
-app.use(router);
-app.mount('#app')
+window.appConfig = {
+    apiUrl: '/api'
+};
+
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
+window.Pusher = Pusher;
+window.Echo = new Echo({
+    broadcaster: 'pusher',
+    key: '7c0809d6fcfd2fcf9ad0',
+    cluster: 'eu', 
+    forceTLS: false,
+    encrypted: false,
+    disableStats: true, 
+    enabledTransports: ['ws'] 
+});
+
+window.Echo.channel('posts.1').listen('.new-comment', (e) => {
+    console.log(1);
+});

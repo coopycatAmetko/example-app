@@ -15,7 +15,10 @@ class Comment extends Model
         'user_name',
         'email',
         'homepage',
-        'text'
+        'text',
+        '_lft',
+        '_rgt',
+        'parent_id',
     ];
 
     /**

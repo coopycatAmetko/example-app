@@ -104,6 +104,13 @@ export default {
     created() {
         this.fetchPost();
         this.fetchComments();
+        console.log(`posts.${this.postId}`);
+        window.Echo.channel(`posts.${this.postId}`)
+            .listen('.new-comment', (e) => {
+                console.log(1);
+                const currentPage = (this.comments.meta && this.comments.meta.current_page) ? this.comments.meta.current_page : 1;
+                this.fetchComments(currentPage);
+            });
     },
 
     methods: {
@@ -148,7 +155,6 @@ export default {
                 this.sortField = field;
                 this.sortOrder = 'desc';
             }
-
             this.fetchComments();
         }
     }

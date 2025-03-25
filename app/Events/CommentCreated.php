@@ -11,7 +11,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Comment;
 
-class CommentCreated
+class CommentCreated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -20,7 +20,7 @@ class CommentCreated
     /**
      * Create a new event instance.
      */
-    public function __construct(Comment $comment)
+    public function __construct(Comment $comment) 
     {
         $this->comment = $comment;
     }
@@ -32,8 +32,15 @@ class CommentCreated
      */
     public function broadcastOn(): array
     {
-        return [
-            new PrivateChannel('channel-name'),
-        ];
+        $channel = $this->comment->parent_id 
+            ? 'comments.' . $this->comment->parent_id
+            : 'posts.' . $this->comment->post_id;
+
+        return [new Channel($channel)];
+    }
+
+    public function broadcastAs()
+    {
+        return 'new-comment';
     }
 }
