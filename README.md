@@ -1,4 +1,5 @@
 Comment System (Laravel + Vue)
+<br>
 Tree comments on posts and other comments
 Image uploading with automatic resizing through queues
 Comment caching for fast loading
@@ -6,6 +7,7 @@ Websockets (Laravel Echo) for updates
 Captcha (GD Library) for spam protection
     
 Installation
+<br>
 pull the project from the git
 create the /public/uploads folder
 create an .env file, you can copy the contents from example-env and fill in your own values.
