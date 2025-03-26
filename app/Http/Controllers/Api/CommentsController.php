@@ -135,7 +135,7 @@ class CommentsController extends Controller
             'homepage' => $request->homepage,
             'text' => $text,
         ]);
-        event(new CommentCreated($comment));
+        event(new CommentCreated($reply));
 
         $reply->appendToNode($comment)->save();
 
